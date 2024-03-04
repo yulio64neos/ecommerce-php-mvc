@@ -1,12 +1,29 @@
-<?php if(isset($_SESSION['pedido']) && $_SESSION['pedido'] == 'complete'): ?>
-<h1>Tu pedido se ha confirmado</h1>
-    <p>
-        Tu pedido ha sido guardado con exito, 
-        una vez que realices la transferencia bancaria a la cuenta 4252659863154 con el coste del pedido, será procesado y enviado...
-    </p>
-    <br>
-    <?php if(isset($pedido)):?>
-        <h3>Datos del pedido:</h3>
+<h1>Detalle del pedido</h1>
+
+<?php if(isset($pedido)):?>
+            <?php if(isset($_SESSION['admin'])):?>
+            <h3>Cambiar el estado del pedido:</h3>
+                <form action="<?=base_url?>pedido/estado" method="POST">
+                <input type="hidden" value="<?=$pedido->id?>" name="pedido_id">
+                    <select name="estado">
+                        <option value="confirm" <?=$pedido->estado == "confirm" ? "selected" : ''?>>Pendiente</option>
+                        <option value="preparation" <?=$pedido->estado == "preparation" ? "selected" : ''?>>En preparacion</option>
+                        <option value="ready" <?=$pedido->estado == "ready" ? "selected" : ''?>>Preparado</option>
+                        <option value="sended" <?=$pedido->estado == "sended" ? "selected" : ''?>>Enviado</option>
+                    </select>
+                    <input type="submit" value="Cambiar estado">
+                </form>
+            <?php endif; ?>
+
+
+            <h3>Dirección de envio:</h3>
+            Estado: <?=Utils::showStatus($pedido->estado)?> <br>
+            Provincia: <?=$pedido->provincia?>
+            Ciudad: <?=$pedido->localidad?>
+            Dirección: <?=$pedido->direccion?>
+            <br>
+
+            <h3>Datos del pedido:</h3>
         
             Número del pedido: <?=$pedido->id?>
             Total a pagar: <?=$pedido->coste?>
@@ -48,8 +65,3 @@
             </table>
         
     <?php endif;?>
-<?php elseif(isset($_SESSION['pedido']) && $_SESSION['pedido'] != 'complete'):?>
-    <p>
-        Tu pedido NO ha podido procesarse
-    </p>
-<?php endif; ?>

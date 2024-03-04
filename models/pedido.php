@@ -10,7 +10,7 @@ class Pedido{
     private $estado;
     private $fecha;
     private $hora;
-
+    
     private $db;
 
     public function __construct(){
@@ -99,6 +99,34 @@ class Pedido{
         return $pedidos->fetch_object();
     }
 
+    public function getOneByUser(){
+        $sql = "SELECT p.id, p.coste FROM pedidos p "
+                //."INNER JOIN lineas_pedidos lp ON lp.pedido_id = p.id "
+               ."WHERE p.usuario_id = {$this->get_usuario_id()} ORDER BY id DESC LIMIT 1;";
+        $pedidos = $this->db->query($sql);
+        return $pedidos->fetch_object();
+    }
+
+    public function getAllByUser(){
+        $sql = "SELECT p.* FROM pedidos p "
+               ."WHERE p.usuario_id = {$this->get_usuario_id()} ORDER BY id DESC;";
+        $pedidos = $this->db->query($sql);
+        return $pedidos;
+    }
+
+    public function getProductsByPedido($id){
+        // $sql = "SELECT * FROM productos WHERE id IN "
+        // ."(SELECT producto_id FROM lineas_pedidos WHERE pedido_id = {$id});";
+
+        $sql = "SELECT pr.*, lp.unidades FROM productos pr "
+              ."INNER JOIN lineas_pedidos lp ON pr.id = lp.producto_id "
+              ."WHERE lp.pedido_id = {$id}";
+
+
+        $productos = $this->db->query($sql);
+        return $productos;
+    }
+
     public function save(){
         $sql = "INSERT INTO pedidos VALUES(NULL, {$this->get_usuario_id()}, '{$this->get_provincia()}', '{$this->get_localidad()}', '{$this->get_direccion()}', {$this->get_coste()}, 'confirm', CURDATE(), CURTIME());";
         $save = $this->db->query($sql);
@@ -121,6 +149,18 @@ class Pedido{
             $insert = "INSERT INTO lineas_pedidos VALUES(NULL, {$pedido_id}, {$producto->id}, {$elemento['unidades']});";
             $save = $this->db->query($insert);
         }
+
+        $result = false;
+        if($save){
+            $result = true;
+        }
+        return $result;
+    }
+
+    public function edit(){
+        $sql = "UPDATE pedidos SET estado = '{$this->get_estado()}' ";
+        $sql .= "WHERE id = '{$this->get_id()}';";
+        $save = $this->db->query($sql);
 
         $result = false;
         if($save){
